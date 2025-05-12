@@ -5,20 +5,17 @@ import { exec } from 'child_process';
 import bodyParser from 'body-parser';
 import { fileURLToPath } from 'url';
 
-
-// Inicialització d'Express
 const app = express();
-const PORT = 3000;
+const PORT = 8080;
 
-// Configuració de __dirname en mòduls ES
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename)
+const __dirname = path.dirname(__filename);
 
-// Càrrega de middlewares
+// Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Servim els arxius estàtics de /public
+// Arxius estàtics
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Ruta principal
@@ -26,65 +23,64 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Endpoint POST per a rebre les dades del formulari
+// POST: processa el formulari
 app.post('/enviar-matricula', async (req, res) => {
     try {
-        // 1. Recollir les dades del formulari
         const dadesMatricula = req.body;
 
-        // 2. Generar XML amb les dades
-        const xmlPath = path.join(__dirname, 'uploads', 'matricula.xml');
+        // Assegurem que 'moduls' sigui un array
+        if (typeof dadesMatricula.moduls === 'string') {
+            dadesMatricula.moduls = dadesMatricula.moduls.split(',').map(a => a.trim());
+        }
+
+        const uploadsDir = path.join(__dirname, 'uploads');
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+
+        const xmlPath = path.join(uploadsDir, 'matricula.xml');
+        const foPath = path.join(uploadsDir, 'matricula.fo');
+        const pdfPath = path.join(uploadsDir, 'matricula.pdf');
+
         const xmlContent = generarXML(dadesMatricula);
         fs.writeFileSync(xmlPath, xmlContent);
 
-        // 3. Aplicar transformació XSLT → XSL-FO
-        const foPath = path.join(__dirname, 'uploads', 'matricula.fo');
         await transformarXSLT(xmlPath, foPath);
-
-        // 4. Generar PDF a partir del XSL-FO
-        const pdfPath = path.join(__dirname, 'uploads', 'matricula.pdf');
         await generarPDF(foPath, pdfPath);
 
-        // 5. Enviar PDF com a resposta
         res.download(pdfPath, 'matricula.pdf');
-
     } catch (error) {
         console.error(error);
         res.status(500).send('Error generant el PDF');
     }
 });
 
-// Funció auxiliar per a generar l'XML
 function generarXML(dades) {
-    /*
-    TO-DO:
+    const moduls = dades.moduls || [];
+    const modulsXML = moduls.map(m => `<modul>${m}</modul>`).join('\n');
 
-    Amb les dades rebudes, generem un XML, amb el format corresponent (veieu exemple)
-    */
-    return `
+    return `<?xml version="1.0" encoding="UTF-8"?>
 <matricula>
-  ...
-</matricula>
-    `;
+  <nom>${dades.nom}</nom>
+  <cognoms>${dades.cognoms}</cognoms>
+  <email>${dades.email}</email>
+  <adreca>${dades.adreca}</adreca>
+  <telefon>${dades.telefon}</telefon>
+  <cicle>${dades.cicle}</cicle>
+  <curs>${dades.curs}</curs>
+  <moduls>
+    ${modulsXML}
+  </moduls>
+</matricula>`;
 }
 
-// Funció auxiliar per aplicar l'XSLT
+// Transformació XSLT → FO
 function transformarXSLT(xmlPath, foPath) {
     return new Promise((resolve, reject) => {
-        /*
-        TO-DO:
-
-        Crea l'ordre xsltproc per convertir l'xml definit en xmlPath en un XML en format
-        XSL-FO en foPath. 
-
-        La plantilla la guardareu en ./xslt/matricula.xsl
-
-        */
-        const cmd = ``;
+        const xslPath = path.join(__dirname, 'xslt', 'matricula.xsl');
+        const cmd = `xsltproc -o "${foPath}" "${xslPath}" "${xmlPath}"`;
 
         exec(cmd, (error, stdout, stderr) => {
             if (error) {
-                reject(`Error aplicant XSLT: ${error}`);
+                reject(`Error aplicant XSLT: ${stderr}`);
             } else {
                 resolve();
             }
@@ -92,21 +88,14 @@ function transformarXSLT(xmlPath, foPath) {
     });
 }
 
-// Funció auxiliar per a generar el PDF (cridant Apache FOP)
+// Generació de PDF amb FOP
 function generarPDF(foPath, pdfPath) {
     return new Promise((resolve, reject) => {
-        /* TO-DO: 
-        
-        Crea l'ordre que utilitzaràs amb fop per convertir l'XML-FO a PDF
-        L'xml-fo es troba a foPath i el pdf el generaràs en pdfPath 
-
-        */
-        
         const cmd = `fop "${foPath}" "${pdfPath}"`;
 
         exec(cmd, (error, stdout, stderr) => {
             if (error) {
-                reject(`Error generant PDF: ${error}`);
+                reject(`Error generant PDF: ${stderr}`);
             } else {
                 resolve();
             }
@@ -114,8 +103,7 @@ function generarPDF(foPath, pdfPath) {
     });
 }
 
-// Escoltem el servidor
+// Inici del servidor
 app.listen(PORT, () => {
     console.log(`Servidor escoltant a http://localhost:${PORT}`);
 });
-

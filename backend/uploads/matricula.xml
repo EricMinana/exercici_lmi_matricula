@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<matricula>
+  <nom>Eric M</nom>
+  <cognoms>miañana</cognoms>
+  <email>hola@gmail.com</email>
+  <adreca>calleeeee</adreca>
+  <telefon>99696969</telefon>
+  <cicle>DAM</cicle>
+  <curs>2</curs>
+  <moduls>
+    <modul>Accés a Dades</modul>
+<modul>Desenvolupament d'Interfícies</modul>
+<modul>Programació Multimèdia i Dispositius mòbils</modul>
+<modul>Programació de Serveis i Processos</modul>
+  </moduls>
+</matricula>

@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -18,34 +16,43 @@
             <label for="nom">Nom:</label>
             <input type="text" id="nom" name="nom" required><br>
 
-            <!-- TO-DO
-            
-            * Definir els camps de formulari:
+            <label for="cognoms">Cognoms:</label>
+            <input type="text" id="cognoms" name="cognoms" required><br>
 
-              * Cognoms (obligatori)
-              * Correu electrònic (obligatori i en format de correu electrónic)
-              * adreça
-              * Telèfon
+            <label for="email">Correu electrònic:</label>
+            <input type="email" id="email" name="email" required><br>
 
-            -->
+            <label for="adreca">Adreça:</label>
+            <input type="text" id="adreca" name="adreca"><br>
+
+            <label for="telefon">Telèfon:</label>
+            <input type="tel" id="telefon" name="telefon"><br>
         </fieldset>
 
         <fieldset>
             <legend>Estudis</legend>
-            <!--  TO-DO:
-              
-                Definir els següents camps de formulari:
 
-                * Select pe al cicle, amb les opcions DAM i DAW
-                * Curs: Amb dos inputs de tipus Radio per triar 1r o 2n.
+            <label for="cicle">Cicle Formatiu:</label>
+            <select id="cicle" name="cicle" required>
+                <option value="">-- Selecciona --</option>
+                <option value="DAM">DAM</option>
+                <option value="DAW">DAW</option>
+            </select>
 
-            -->
-
+            <p>Curs:</p>
+            <label>
+                <input type="radio" name="curs" value="1" checked>
+                Primer
+            </label>
+            <label>
+                <input type="radio" name="curs" value="2">
+                Segon
+            </label>
         </fieldset>
 
         <fieldset id="modulsFieldset">
             <legend>Mòduls Professionals</legend>
-            <!-- Els checkboxes dels mòduls es generaran dinàmicament -->
+            
         </fieldset>
 
         <button type="submit">Enviar matrícula</button>
